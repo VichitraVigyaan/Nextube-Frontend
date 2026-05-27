@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexTube - Cinema, Creators, Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css.css?v=thumbs-local-1">
+  <script src="config.js"></script>
+  <script src="javaScript.js?v=thumbs-local-1" defer></script>
+</head>
+<body>
+  <div id="appLoader" class="app-loader">
+    <div class="loader-mark">N</div>
+    <div>
+      <strong>NexTube</strong>
+      <span>Loading your cinematic workspace...</span>
+    </div>
+  </div>
+
+  <div id="toastRegion" class="toast-region" aria-live="polite"></div>
+
+  <header class="topbar">
+    <div class="brand-cluster">
+      <button id="sidebarToggle" class="icon-button helpable" data-help="Collapse or expand the navigation rail.">☰</button>
+      <button id="homeNav" class="brand-button" data-view="home">
+        <span class="brand-glyph">▶</span>
+        <span>
+          <strong>NexTube</strong>
+          <small>cinema + creator cloud</small>
+        </span>
+      </button>
+    </div>
+
+    <div class="global-search helpable" data-help="Search the section you selected.">
+      <span>⌕</span>
+      <input id="globalSearch" type="search" placeholder="Search movies or videos...">
+      <button id="searchSubmit" class="icon-button" type="button" aria-label="Search" title="Search">⌕</button>
+      <div id="searchSuggestions" class="search-suggestions hidden"></div>
+    </div>
+
+    <div class="top-actions">
+      <div class="section-toggle" aria-label="Content section">
+        <button class="section-choice active" data-section="movie" type="button">Movies</button>
+        <button class="section-choice" data-section="creator-video" type="button">Videos</button>
+      </div>
+      <button id="themeToggle" class="icon-button helpable" data-help="Switch between deep cinema mode and clean light mode.">◐</button>
+      <button id="quickUpload" class="accent-button helpable" data-help="Upload a real video file. Creator uploads wait for admin approval.">Upload</button>
+      <button id="authButton" class="primary-button helpable" data-help="Sign in to sync likes, comments, reports, uploads, and admin tools.">Sign in</button>
+      <button id="profileButton" class="avatar-button hidden">U</button>
+      <div id="profileMenu" class="profile-menu hidden">
+        <div class="profile-menu-head">
+          <span id="profileMenuAvatar">U</span>
+          <div>
+            <strong id="profileMenuName">User</strong>
+            <small id="profileMenuEmail">user@example.com</small>
+          </div>
+        </div>
+        <button data-view="watchlist">Watchlist</button>
+        <button data-view="later">Watch Later</button>
+        <button data-view="history">History</button>
+        <button data-view="upload">Upload Studio</button>
+        <button id="profileAdminLink" class="hidden" data-view="admin">Admin Center</button>
+        <button id="logoutButton" class="danger-menu">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <aside id="sidebar" class="sidebar">
+    <nav class="nav-stack">
+      <button class="nav-link active" data-view="home"><span>⌂</span><strong>Home</strong><small>Dashboard</small></button>
+      <button class="nav-link" data-view="movies"><span>🎬</span><strong>Movies</strong><small>Catalog</small></button>
+      <button class="nav-link" data-view="creators"><span>▶</span><strong>Videos</strong><small>Uploads</small></button>
+      <button class="nav-link" data-view="watchlist"><span>＋</span><strong>Watchlist</strong><small id="navWatchlistCount">0 saved</small></button>
+      <button class="nav-link" data-view="later"><span>⏱</span><strong>Watch Later</strong><small id="navLaterCount">0 queued</small></button>
+      <button class="nav-link" data-view="history"><span>↺</span><strong>History</strong><small id="navHistoryCount">0 watched</small></button>
+      <button class="nav-link" data-view="upload"><span>⇧</span><strong>Studio</strong><small>Submit</small></button>
+      <button id="adminNav" class="nav-link admin-only hidden" data-view="admin"><span>◆</span><strong>Admin</strong><small>Moderate</small></button>
+    </nav>
+    <div class="sidebar-card helpable" data-help="The API indicator shows whether the frontend is receiving data from the backend.">
+      <span class="status-dot" id="apiDot"></span>
+      <div>
+        <strong id="apiStatus">Connecting</strong>
+        <small id="apiDetail">Backend sync</small>
+      </div>
+    </div>
+  </aside>
+
+  <main id="main" class="main-shell">
+    <section id="homeView" class="view active">
+      <section class="hero-stage">
+        <div class="hero-copy">
+          <span class="eyebrow"><i></i> Featured from backend</span>
+          <h1 id="heroTitle">NexTube</h1>
+          <p id="heroDescription">A premium streaming workspace for movie discovery, creator uploads, and admin approvals.</p>
+          <div class="hero-meta" id="heroMeta"></div>
+          <div class="hero-actions">
+            <button id="heroPrimary" class="primary-button large">Open</button>
+            <button id="heroSave" class="glass-button large">Save</button>
+            <button id="heroInfo" class="glass-button large">Details</button>
+          </div>
+        </div>
+        <div class="hero-art">
+          <div id="heroPoster" class="mega-poster"></div>
+          <div class="floating-panel top">
+            <span>Backend catalog</span>
+            <strong id="heroCatalogCount">0 titles</strong>
+          </div>
+          <div class="floating-panel bottom">
+            <span>Review queue</span>
+            <strong id="heroQueueCount">0 pending</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="mood-home">
+        <div class="mood-copy">
+          <span class="section-kicker">Start here</span>
+          <h2>What are you in the mood to watch?</h2>
+          <p>Pick a mood and NexTube will refresh this page with matching titles from the backend.</p>
+        </div>
+        <div class="mood-grid">
+          <button class="mood-card" data-mood-pick="intense" type="button"><span>⚡</span><strong>Intense</strong><small>Action, thrillers, crime</small></button>
+          <button class="mood-card" data-mood-pick="comfort" type="button"><span>☕</span><strong>Comfort</strong><small>Comedy, music, warmth</small></button>
+          <button class="mood-card" data-mood-pick="smart" type="button"><span>◆</span><strong>Smart</strong><small>Drama, history, ideas</small></button>
+          <button class="mood-card" data-mood-pick="family" type="button"><span>✨</span><strong>Family</strong><small>Light and easy picks</small></button>
+          <button class="mood-card surprise" id="homeSurprise" type="button"><span>?</span><strong>Surprise me</strong><small>Open a random good match</small></button>
+        </div>
+      </section>
+
+      <section class="metric-grid">
+        <article class="metric-card helpable" data-help="Total public videos and movie catalog records currently returned by the backend.">
+          <span>Library</span>
+          <strong id="metricLibrary">0</strong>
+          <small>public records</small>
+        </article>
+        <article class="metric-card helpable" data-help="Views stored in the backend. Seed catalog items begin at zero; uploaded videos increment when opened.">
+          <span>Views</span>
+          <strong id="metricViews">0</strong>
+          <small>saved count</small>
+        </article>
+        <article class="metric-card helpable" data-help="Movies are real metadata records; playback requires licensed or uploaded files.">
+          <span>Movies</span>
+          <strong id="metricMovies">0</strong>
+          <small>authentic metadata</small>
+        </article>
+        <article class="metric-card helpable" data-help="Uploads from non-admin users are saved to the approval queue before becoming public.">
+          <span>Pending</span>
+          <strong id="metricPending">0</strong>
+          <small>waiting approval</small>
+        </article>
+      </section>
+
+      <section class="control-deck">
+        <div>
+          <span class="section-kicker">Smart discovery</span>
+          <h2 id="recommendTitle">Tell NexTube what movie you feel like watching.</h2>
+        </div>
+        <div class="control-row">
+          <label>Mood<select id="moodFilter">
+            <option value="all">Any mood</option>
+            <option value="intense">Intense</option>
+            <option value="comfort">Comfort</option>
+            <option value="smart">Smart</option>
+            <option value="family">Family</option>
+          </select></label>
+          <label>Length<select id="lengthFilter">
+            <option value="all">Any runtime</option>
+            <option value="short">Under 2h</option>
+            <option value="standard">2h to 2h30</option>
+            <option value="epic">Epic</option>
+          </select></label>
+          <label>Type<select id="typeFilter">
+            <option value="movie">Movies</option>
+            <option value="creator-video">Videos</option>
+          </select></label>
+          <button id="surpriseButton" class="accent-button">Surprise me</button>
+        </div>
+      </section>
+
+      <section class="type-switcher hidden" data-help="Switch between the complete backend library, movie metadata, and playable creator video uploads.">
+        <button class="type-pill active" data-home-type="all"><span>◆</span> All</button>
+        <button class="type-pill" data-home-type="movie"><span>🎬</span> Movies</button>
+        <button class="type-pill" data-home-type="creator-video"><span>▶</span> Videos</button>
+      </section>
+
+      <section class="content-band">
+        <div class="section-title">
+          <div><span class="section-kicker">Recommended</span><h2>Smart picks</h2></div>
+          <button class="text-button section-browse" data-view="movies">Browse Movies</button>
+        </div>
+        <div id="smartRail" class="smart-rail"></div>
+      </section>
+
+      <section class="content-band">
+        <div class="section-title">
+          <div><span class="section-kicker">Current section</span><h2 id="typedTitle">Movies</h2></div>
+          <button class="text-button section-browse" data-view="movies">Open Movies</button>
+        </div>
+        <div id="typedGrid" class="poster-grid"></div>
+      </section>
+
+      <section class="content-band">
+        <div class="section-title">
+          <div><span class="section-kicker">Premium catalog</span><h2>Movie Mode</h2></div>
+          <div id="movieFilters" class="pill-row"></div>
+        </div>
+        <div id="movieGrid" class="poster-grid"></div>
+      </section>
+
+      <section class="content-band split-band">
+        <div>
+          <div class="section-title compact">
+            <div><span class="section-kicker">Creator cloud</span><h2>Latest uploads</h2></div>
+          </div>
+          <div id="creatorGrid" class="compact-list"></div>
+        </div>
+        <div>
+          <div class="section-title compact">
+            <div><span class="section-kicker">Saved locally</span><h2>Your Watchlist</h2></div>
+          </div>
+          <div id="watchlistPreview" class="compact-list"></div>
+        </div>
+      </section>
+    </section>
+
+    <section id="moviesView" class="view">
+      <div class="page-heading">
+        <div><span class="section-kicker">Catalog</span><h1>Movies</h1><p>Authentic movie metadata saved through the backend database.</p></div>
+        <div class="control-row small"><input id="movieSearch" type="search" placeholder="Filter movies..."><select id="movieSort"><option value="rating">Rating</option><option value="year">Year</option><option value="title">Title</option></select></div>
+      </div>
+      <div id="moviesPageGrid" class="poster-grid large"></div>
+    </section>
+
+    <section id="creatorsView" class="view">
+      <div class="page-heading">
+        <div><span class="section-kicker">Videos</span><h1>Videos</h1><p>Playable uploaded files and creator submissions that have been approved.</p></div>
+      </div>
+      <div id="creatorsPageGrid" class="card-grid"></div>
+    </section>
+
+    <section id="watchlistView" class="view">
+      <div class="page-heading">
+        <div><span class="section-kicker">Saved</span><h1>Watchlist</h1><p>Saved titles are stored in this browser and use backend records for display.</p></div>
+        <button id="clearWatchlist" class="danger-button">Clear</button>
+      </div>
+      <div id="watchlistGrid" class="poster-grid"></div>
+    </section>
+
+    <section id="laterView" class="view">
+      <div class="page-heading">
+        <div><span class="section-kicker">Queue</span><h1>Watch Later</h1><p>A separate queue for titles you want to come back to soon.</p></div>
+        <button id="clearLater" class="danger-button">Clear</button>
+      </div>
+      <div id="laterGrid" class="poster-grid"></div>
+    </section>
+
+    <section id="historyView" class="view">
+      <div class="page-heading">
+        <div><span class="section-kicker">Activity</span><h1>Watch History</h1><p>Items you opened or played, tracked locally by backend record ID.</p></div>
+        <button id="clearHistory" class="danger-button">Clear</button>
+      </div>
+      <div id="historyGrid" class="poster-grid"></div>
+    </section>
+
+    <section id="searchView" class="view">
+      <div class="page-heading">
+        <div><span class="section-kicker">Search</span><h1>Search Results</h1><p id="searchSummary">Search across movies, videos, creators, directors, cast, and tags.</p></div>
+        <div class="control-row small">
+          <select id="searchTypeFilter"><option value="movie">Movies</option><option value="creator-video">Videos</option></select>
+          <select id="searchSort"><option value="relevance">Relevance</option><option value="rating">Rating</option><option value="new">Newest</option><option value="views">Views</option></select>
+        </div>
+      </div>
+      <div id="searchGrid" class="poster-grid large"></div>
+    </section>
+
+    <section id="uploadView" class="view">
+      <div class="page-heading">
+        <div><span class="section-kicker">Studio</span><h1>Upload a real video</h1><p>The selected file is sent to the backend, stored in uploads, and reviewed before publication.</p></div>
+      </div>
+      <form id="uploadForm" class="studio-layout">
+        <div class="drop-card helpable" data-help="Pick a real video file. The backend stores it and returns a playable URL.">
+          <input id="uploadVideo" type="file" accept="video/*">
+          <div class="drop-visual"><span>⇧</span><strong id="videoFileName">Choose video file</strong><small>MP4, WebM, MOV, or browser-supported video</small></div>
+        </div>
+        <div class="studio-fields">
+          <label>Title<input id="uploadTitle" type="text" maxlength="120" placeholder="Give your upload a clear title" required></label>
+          <label>Description<textarea id="uploadDescription" rows="5" placeholder="Tell viewers what this is about"></textarea></label>
+          <div class="field-grid">
+            <label>Upload to<select id="uploadKind"><option value="creator-video">Video section</option><option value="movie">Movie section (30+ min)</option></select></label>
+            <label>Runtime minutes<input id="uploadRuntime" type="number" min="1" value="5" placeholder="Required"></label>
+            <label>Category<select id="uploadCategory"><option value="movie">Movie</option><option value="tech">Tech</option><option value="gaming">Gaming</option><option value="music">Music</option><option value="education">Education</option><option value="comedy">Comedy</option></select></label>
+            <label>Visibility<select id="uploadVisibility"><option value="public">Public after approval</option><option value="unlisted">Unlisted</option><option value="private">Private</option></select></label>
+          </div>
+          <label>Tags<input id="uploadTags" type="text" placeholder="cinema, trailer, tutorial"></label>
+          <label>Auto captions draft<textarea id="uploadCaptions" rows="4" placeholder="Use the Generate captions button to create a starter caption draft."></textarea></label>
+          <button id="generateCaptions" class="glass-button" type="button"><span class="action-icon">CC</span> Generate captions draft</button>
+          <label>Thumbnail<input id="uploadThumbnail" type="file" accept="image/*"></label>
+          <button class="primary-button large" type="submit">Submit for review</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="adminView" class="view">
+      <div class="page-heading">
+        <div><span class="section-kicker">Admin</span><h1>Moderation command center</h1><p>Approve creator uploads, inspect reports, and manage users from backend data.</p></div>
+        <button id="adminRefresh" class="primary-button">Refresh data</button>
+      </div>
+      <section class="metric-grid admin-metrics">
+        <article class="metric-card"><span>Total</span><strong id="adminTotal">0</strong><small>public videos</small></article>
+        <article class="metric-card"><span>Pending</span><strong id="adminPending">0</strong><small>uploads</small></article>
+        <article class="metric-card"><span>Reports</span><strong id="adminReports">0</strong><small>open reports</small></article>
+        <article class="metric-card"><span>Users</span><strong id="adminUsers">0</strong><small>accounts</small></article>
+      </section>
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-admin-tab="pending">Pending</button>
+        <button class="admin-tab" data-admin-tab="reports">Reports</button>
+        <button class="admin-tab" data-admin-tab="users">Users</button>
+      </div>
+      <div id="adminPanel" class="admin-panel"></div>
+    </section>
+  </main>
+
+  <div id="authModal" class="modal-layer hidden">
+    <div class="auth-card">
+      <button class="modal-close" data-close-modal>✕</button>
+      <div class="auth-copy">
+        <span class="section-kicker">Account</span>
+        <h2>Sign in once. Control everything.</h2>
+        <p>Use the demo admin to test approval, reports, and user management.</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-auth-tab="login">Login</button>
+        <button class="auth-tab" data-auth-tab="register">Register</button>
+      </div>
+      <form id="loginForm" class="auth-form active">
+        <label>Email<input id="loginEmail" type="email" placeholder="admin@nextube.local"></label>
+        <label>Password<input id="loginPassword" type="password" placeholder="admin123"></label>
+        <div class="form-row"><label class="checkbox-line"><input id="rememberMe" type="checkbox" checked> Remember me</label><button id="fillAdmin" type="button" class="text-button">Use demo admin</button></div>
+        <button class="primary-button large" type="submit">Sign in</button>
+      </form>
+      <form id="registerForm" class="auth-form">
+        <label>Name<input id="registerName" type="text" placeholder="Your display name"></label>
+        <label>Email<input id="registerEmail" type="email" placeholder="you@example.com"></label>
+        <label>Password<input id="registerPassword" type="password" placeholder="6+ characters"></label>
+        <label>Account type<select id="registerRole"><option value="viewer">Viewer</option><option value="creator">Creator</option></select></label>
+        <button class="primary-button large" type="submit">Create account</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="detailModal" class="modal-layer hidden">
+    <div class="detail-card">
+      <button class="modal-close" data-close-modal>✕</button>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <div id="playerModal" class="modal-layer hidden">
+    <div class="player-card">
+      <button class="modal-close" data-close-modal>✕</button>
+      <video id="player" controls></video>
+      <div class="player-info">
+        <h2 id="playerTitle"></h2>
+        <p id="playerDescription"></p>
+        <div class="player-actions">
+          <button id="likeButton" class="glass-button helpable" data-help="Saves your like to the backend for this signed-in user."><span class="action-icon">👍</span> Like <span id="likeCount">0</span></button>
+          <button id="dislikeButton" class="glass-button helpable" data-help="Saves your dislike to the backend and can be toggled."><span class="action-icon">👎</span> Dislike <span id="dislikeCount">0</span></button>
+          <button id="watchLaterButton" class="glass-button helpable" data-help="Adds this backend record to your local Watch Later queue."><span class="action-icon">⏱</span> Later</button>
+          <button id="reportButton" class="glass-button helpable" data-help="Sends a report to the backend admin review area."><span class="action-icon">⚑</span> Report</button>
+          <a id="downloadButton" class="glass-button helpable" data-help="Downloads the real uploaded/playable file. Catalog-only movies cannot download." href="#" download><span class="action-icon">⇩</span> Download</a>
+        </div>
+        <div class="comment-box">
+          <textarea id="commentInput" rows="3" placeholder="Add a comment..."></textarea>
+          <button id="commentSubmit" class="primary-button"><span class="action-icon">💬</span> Post comment</button>
+        </div>
+        <div id="commentList" class="comment-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="commandPalette" class="modal-layer hidden">
+    <div class="command-card">
+      <div class="command-head"><span class="section-kicker">Command palette</span><button class="modal-close" data-close-modal>✕</button></div>
+      <input id="commandInput" type="text" placeholder="Search titles, pages, actions...">
+      <div id="commandResults" class="command-results"></div>
+    </div>
+  </div>
+
+  <div id="onboardingModal" class="modal-layer hidden">
+    <div class="auth-card onboarding-card">
+      <button class="modal-close" data-close-modal>✕</button>
+      <div class="auth-copy">
+        <span class="section-kicker">Personalize</span>
+        <h2>Shape your NexTube feed.</h2>
+        <p>Your answers are saved to the backend profile so NexTube remembers your taste.</p>
+      </div>
+      <form id="onboardingForm" class="auth-form active">
+        <label>Favorite content<select id="prefTypes" multiple size="4"><option value="movies">Movies</option><option value="creator-videos">Creator videos</option><option value="tutorials">Tutorials</option><option value="short-films">Short films</option></select></label>
+        <label>Mood preferences<select id="prefMoods" multiple size="4"><option value="intense">Intense</option><option value="comfort">Comfort</option><option value="smart">Smart</option><option value="family">Family</option></select></label>
+        <label>Preferred length<select id="prefLength"><option value="any">Any length</option><option value="short">Short</option><option value="standard">Standard</option><option value="long">Long movies</option></select></label>
+        <label>Creator goal<input id="prefGoal" type="text" placeholder="Watching, uploading, reviewing, learning..."></label>
+        <label>Experience<select id="prefExperience"><option value="cinematic">Cinematic</option><option value="simple">Simple</option><option value="creator">Creator focused</option><option value="balanced">Balanced</option></select></label>
+        <button class="primary-button large" type="submit">Save preferences</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
